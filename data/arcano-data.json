@@ -4,7 +4,7 @@
     "envGrande": 1750,
     "pkgChico": 0,
     "pkgGrande": 0,
-    "etiqueta": 0,
+    "etiqueta": 3,
     "mo": 0,
     "otros": 0
   },
@@ -12,233 +12,233 @@
     {
       "nombre": "Ajo polvo",
       "precioKg": 17000,
-      "id": 1782314399451,
-      "stock": 100,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399451
     },
     {
       "nombre": "Ajo escama",
       "precioKg": 0,
       "id": 1782314399452,
-      "stock": 0,
+      "stock": 10000,
       "stockMin": 500
     },
     {
       "nombre": "Ajo grano",
       "precioKg": 0,
       "id": 1782314399453,
-      "stock": 20000,
+      "stock": 10000,
       "stockMin": 500
     },
     {
       "nombre": "Cebolla en polvo",
       "precioKg": 19200,
-      "id": 1782314399454,
-      "stock": 200000,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399454
     },
     {
       "nombre": "Cebolla en escamas",
       "precioKg": 0,
-      "id": 1782314399455,
-      "stock": 2968698538542,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399455
     },
     {
       "nombre": "Paprika",
       "precioKg": 17000,
-      "id": 1782314399456,
-      "stock": 69636,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399456
     },
     {
       "nombre": "Pimenton en escamas",
       "precioKg": 0,
-      "id": 1782314399457,
-      "stock": 6436436,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399457
     },
     {
       "nombre": "Paprika ahumada",
       "precioKg": 0,
-      "id": 1782314399458,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399458
     },
     {
       "nombre": "Oregano",
       "precioKg": 20000,
-      "id": 1782314399459,
-      "stock": 8000000,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399459
     },
     {
       "nombre": "Albahaca",
       "precioKg": 26400,
-      "id": 1782314399460,
-      "stock": 50000,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399460
     },
     {
       "nombre": "Tomillo",
       "precioKg": 26500,
-      "id": 1782314399461,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399461
     },
     {
       "nombre": "Laurel",
       "precioKg": 31500,
-      "id": 1782314399462,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399462
     },
     {
       "nombre": "Romero",
       "precioKg": 26500,
       "id": 1782314399463,
-      "stock": 0,
+      "stock": 10000,
       "stockMin": 500
     },
     {
       "nombre": "Canela",
       "precioKg": 95000,
-      "id": 1782314399464,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399464
     },
     {
       "nombre": "Canela en polvo",
       "precioKg": 34000,
-      "id": 1782314399465,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399465
     },
     {
       "nombre": "Clavos",
       "precioKg": 29000,
-      "id": 1782314399466,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399466
     },
     {
       "nombre": "Clavos polvo",
       "precioKg": 32000,
-      "id": 1782314399467,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399467
     },
     {
       "nombre": "Jengibre",
       "precioKg": 19500,
-      "id": 1782314399468,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399468
     },
     {
       "nombre": "Pimienta comun",
       "precioKg": 39000,
-      "id": 1782314399469,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399469
     },
     {
       "nombre": "Pimienta negra",
       "precioKg": 53000,
-      "id": 1782314399470,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399470
     },
     {
       "nombre": "Pimienta blanca",
       "precioKg": 0,
-      "id": 1782314399471,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399471
     },
     {
       "nombre": "Pimienta dulce",
       "precioKg": 50500,
-      "id": 1782314399472,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399472
     },
     {
       "nombre": "Pimienta cayena",
       "precioKg": 41000,
-      "id": 1782314399473,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399473
     },
     {
       "nombre": "Comino",
       "precioKg": 27000,
-      "id": 1782314399474,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399474
     },
     {
       "nombre": "Hinojo",
       "precioKg": 43500,
-      "id": 1782314399475,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399475
     },
     {
       "nombre": "Coreandro",
       "precioKg": 0,
-      "id": 1782314399476,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399476
     },
     {
       "nombre": "Semillas de Cilantro",
       "precioKg": 28800,
-      "id": 1782314399477,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399477
     },
     {
       "nombre": "Fenogreco",
       "precioKg": 28800,
-      "id": 1782314399478,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399478
     },
     {
       "nombre": "Semillas de Mostaza",
       "precioKg": 32000,
-      "id": 1782314399479,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399479
     },
     {
       "nombre": "Cardamomo",
       "precioKg": 0,
-      "id": 1782314399480,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399480
     },
     {
       "nombre": "Curcuma",
       "precioKg": 16800,
-      "id": 1782314399481,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399481
     },
     {
       "nombre": "Nuez moscada",
       "precioKg": 0,
-      "id": 1782314399482,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399482
     },
     {
       "nombre": "Anis estrellado",
       "precioKg": 0,
-      "id": 1782314399483,
-      "stock": 0,
-      "stockMin": 500
+      "stock": 10000,
+      "stockMin": 500,
+      "id": 1782314399483
     }
   ],
   "blends": [
@@ -608,9 +608,45 @@
       "nota": "",
       "fecha": "2026-06-24T20:45:42.379Z",
       "usuario": "Admin"
+    },
+    {
+      "id": 1782333901721,
+      "espId": 1782314399452,
+      "tipo": "entrada",
+      "cantidad": 10000,
+      "nota": "",
+      "fecha": "2026-06-24T20:52:19.326Z",
+      "usuario": "Admin"
+    },
+    {
+      "id": 1782333901722,
+      "espId": 1782314399451,
+      "tipo": "entrada",
+      "cantidad": 10000,
+      "nota": "",
+      "fecha": "2026-06-24T20:52:34.964Z",
+      "usuario": "Admin"
+    },
+    {
+      "id": 1782333901723,
+      "espId": 1782314399453,
+      "tipo": "salida",
+      "cantidad": 10000,
+      "nota": "",
+      "fecha": "2026-06-24T20:53:21.604Z",
+      "usuario": "Admin"
+    },
+    {
+      "id": 1782333901724,
+      "espId": 1782314399463,
+      "tipo": "entrada",
+      "cantidad": 10000,
+      "nota": "",
+      "fecha": "2026-06-24T20:55:47.266Z",
+      "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T20:45:42.379Z",
+  "_lastModified": "2026-06-24T21:51:21.191Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
