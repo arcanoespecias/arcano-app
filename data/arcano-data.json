@@ -48,7 +48,7 @@
       "nombre": "Paprika",
       "precioKg": 17000,
       "id": 1782314399456,
-      "stock": 0,
+      "stock": 69636,
       "stockMin": 500
     },
     {
@@ -563,9 +563,18 @@
       "nota": "",
       "fecha": "2026-06-24T15:32:26.729Z",
       "usuario": "Operador"
+    },
+    {
+      "id": 1782315083531,
+      "espId": 1782314399456,
+      "tipo": "entrada",
+      "cantidad": 69636,
+      "nota": "",
+      "fecha": "2026-06-24T15:36:47.454Z",
+      "usuario": "Operador"
     }
   ],
-  "_lastModified": "2026-06-24T15:32:26.729Z",
+  "_lastModified": "2026-06-24T15:36:47.455Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
