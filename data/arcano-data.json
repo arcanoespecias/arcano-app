@@ -52,7 +52,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "PimentÃÂÃÂ³n en escamas",
+      "nombre": "PimentÃÂÃÂÃÂÃÂ³n en escamas",
       "precioKg": 0,
       "id": 1782264912992,
       "stock": 100000,
@@ -66,7 +66,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "OrÃÂÃÂ©gano",
+      "nombre": "OrÃÂÃÂÃÂÃÂ©gano",
       "precioKg": 20000,
       "id": 1782264912994,
       "stock": 0,
@@ -76,7 +76,7 @@
       "nombre": "Albahaca",
       "precioKg": 26400,
       "id": 1782264912995,
-      "stock": 0,
+      "stock": 22330000,
       "stockMin": 500
     },
     {
@@ -136,7 +136,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "Pimienta comÃÂÃÂºn",
+      "nombre": "Pimienta comÃÂÃÂÃÂÃÂºn",
       "precioKg": 39000,
       "id": 1782264913004,
       "stock": 0,
@@ -220,7 +220,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "CÃÂÃÂºrcuma",
+      "nombre": "CÃÂÃÂÃÂÃÂºrcuma",
       "precioKg": 16800,
       "id": 1782264913016,
       "stock": 0,
@@ -234,7 +234,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "AnÃÂÃÂ­s estrellado",
+      "nombre": "AnÃÂÃÂÃÂÃÂ­s estrellado",
       "precioKg": 0,
       "id": 1782264913018,
       "stock": 0,
@@ -296,7 +296,7 @@
       "notas": ""
     },
     {
-      "nombre": "CajÃÂÃÂºn",
+      "nombre": "CajÃÂÃÂÃÂÃÂºn",
       "ingredientes": [
         {
           "espId": 1782264912991,
@@ -353,7 +353,7 @@
         },
         {
           "espId": 1782264912994,
-          "nombre": "OrÃÂÃÂ©gano",
+          "nombre": "OrÃÂÃÂÃÂÃÂ©gano",
           "gramos": 200,
           "precioKg": 20000
         },
@@ -459,7 +459,7 @@
         },
         {
           "espId": 1782264912994,
-          "nombre": "OrÃÂÃÂ©gano",
+          "nombre": "OrÃÂÃÂÃÂÃÂ©gano",
           "gramos": 100,
           "precioKg": 20000
         },
@@ -506,7 +506,7 @@
         },
         {
           "espId": 1782264912994,
-          "nombre": "OrÃÂÃÂ©gano",
+          "nombre": "OrÃÂÃÂÃÂÃÂ©gano",
           "gramos": 100,
           "precioKg": 20000
         }
@@ -525,14 +525,14 @@
       "nombre": "Admin",
       "pin": "0621",
       "rol": "admin",
-      "emoji": "ÃÂ°ÃÂÃÂÃÂ",
+      "emoji": "ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ",
       "id": 1
     },
     {
       "nombre": "Operador",
       "pin": "0621",
       "rol": "operador",
-      "emoji": "ÃÂ°ÃÂÃÂÃÂ¿",
+      "emoji": "ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ¿",
       "id": 2
     }
   ],
@@ -590,9 +590,18 @@
       "nota": "",
       "fecha": "2026-06-24T13:55:21.207Z",
       "usuario": "Operador"
+    },
+    {
+      "id": 1782309294610,
+      "espId": 1782264912995,
+      "tipo": "entrada",
+      "cantidad": 22330000,
+      "nota": "",
+      "fecha": "2026-06-24T13:55:58.799Z",
+      "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T13:55:21.207Z",
+  "_lastModified": "2026-06-24T13:55:58.799Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
