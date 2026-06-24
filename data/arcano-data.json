@@ -66,7 +66,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "OrÃ©gano",
+      "nombre": "Orégano",
       "precioKg": 20000,
       "stock": 0,
       "stockMin": 500,
@@ -619,7 +619,7 @@
       "usuario": "Operador"
     }
   ],
-  "_lastModified": "2026-06-24T14:37:00.360Z",
+  "_lastModified": "2026-06-24T14:37:10.405Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
