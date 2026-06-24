@@ -27,7 +27,7 @@
       "nombre": "Ajo grano",
       "precioKg": 0,
       "id": 1782314399453,
-      "stock": 0,
+      "stock": 20000,
       "stockMin": 500
     },
     {
@@ -572,9 +572,18 @@
       "nota": "",
       "fecha": "2026-06-24T15:36:47.454Z",
       "usuario": "Operador"
+    },
+    {
+      "id": 1782317706741,
+      "espId": 1782314399453,
+      "tipo": "entrada",
+      "cantidad": 20000,
+      "nota": "",
+      "fecha": "2026-06-24T16:15:40.506Z",
+      "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T15:59:46.517Z",
+  "_lastModified": "2026-06-24T16:15:40.506Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
