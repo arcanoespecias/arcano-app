@@ -1,5 +1,5 @@
 // ===================== VERSION =====================
-const APP_VERSION = 'v14';
+const APP_VERSION = 'v15';
 
 // ===================== ID COUNTER =====================
 let _idC = Date.now();
