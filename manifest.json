@@ -1,8 +1,8 @@
 {
-  "name": "Arcano — Cómplice del Sabor",
+  "name": "Arcano — Complice del Sabor",
   "short_name": "Arcano",
-  "description": "Gestión de especias y blends para Arcano",
-  "start_url": "/especias/",
+  "description": "Gestion de especias y blends para Arcano",
+  "start_url": "/arcano-app/",
   "display": "standalone",
   "background_color": "#0a0805",
   "theme_color": "#0a0805",

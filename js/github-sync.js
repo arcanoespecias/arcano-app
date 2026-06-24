@@ -1,37 +1,29 @@
-// ===================== GITHUB SYNC MODULE =====================
-// La config de GitHub se embebe en el archivo de datos sincronizado.
-// Así, una vez que el admin configura, todos los dispositivos lo heredan automáticamente.
-// También soporta auto-config por hash de URL (para compartir link al operador).
+// ===================== GITHUB SYNC MODULE v5 =====================
 
 const GH_SYNC_KEY = 'arcano_github_config';
 const GH_DATA_PATH = 'data/arcano-data.json';
-const GH_POLL_INTERVAL = 15000; // 15 segundos
+const GH_POLL_INTERVAL = 3000; // 3 segundos para sync mas rapido
 
 let ghConfig = null;
-let ghRemoteSha = null;       // SHA del archivo en GitHub (para PUT optimista)
+let ghRemoteSha = null;
 let ghPollTimer = null;
-let ghSyncInProgress = false; // evita operaciones simultáneas
+let ghSyncInProgress = false;
+let ghPushErrors = 0;
 
 // -------------------- Config --------------------
 
 function getGhConfig() {
   if (ghConfig) return ghConfig;
-  // 1. localStorage local
   try {
     const saved = JSON.parse(localStorage.getItem(GH_SYNC_KEY) || 'null');
-    if (saved && saved.token && saved.owner && saved.repo) {
-      ghConfig = saved;
-      return ghConfig;
-    }
+    if (saved && saved.token && saved.owner && saved.repo) { ghConfig = saved; return ghConfig; }
   } catch {}
-  // 2. Config embebida en la DB sincronizada (heredada del admin)
   try {
     const dbRaw = localStorage.getItem(DB_KEY);
     if (dbRaw) {
       const db = JSON.parse(dbRaw);
       if (db._ghConfig && db._ghConfig.token && db._ghConfig.owner && db._ghConfig.repo) {
         ghConfig = db._ghConfig;
-        // Persistirla en localStorage para futuros boots rápidos
         localStorage.setItem(GH_SYNC_KEY, JSON.stringify(ghConfig));
         return ghConfig;
       }
@@ -43,7 +35,6 @@ function getGhConfig() {
 function saveGhConfig(config) {
   ghConfig = config;
   localStorage.setItem(GH_SYNC_KEY, JSON.stringify(config));
-  // También embeber la config en la DB local para que viaje con los datos
   try {
     const dbRaw = localStorage.getItem(DB_KEY);
     if (dbRaw) {
@@ -58,7 +49,6 @@ function clearGhConfig() {
   ghConfig = null;
   ghRemoteSha = null;
   localStorage.removeItem(GH_SYNC_KEY);
-  // Quitar la config de la DB local también
   try {
     const dbRaw = localStorage.getItem(DB_KEY);
     if (dbRaw) {
@@ -71,14 +61,12 @@ function clearGhConfig() {
 }
 
 // -------------------- Auto-config por URL hash --------------------
-// Formato: #gh=owner:repo:branch:token  (el token va codificado)
 
 function checkHashConfig() {
   try {
     const hash = window.location.hash;
     if (!hash || !hash.startsWith('#gh=')) return false;
     const encoded = hash.slice(4);
-    // No mostrar el token en la barra de dirección
     history.replaceState(null, '', window.location.pathname);
     const parts = decodeURIComponent(atob(encoded)).split('|');
     if (parts.length < 4) return false;
@@ -86,11 +74,7 @@ function checkHashConfig() {
     if (!owner || !repo || !token) return false;
     saveGhConfig({ owner, repo, branch: branch || 'main', token });
     return true;
-  } catch {
-    // Limpiar hash inválido
-    history.replaceState(null, '', window.location.pathname);
-    return false;
-  }
+  } catch { history.replaceState(null, '', window.location.pathname); return false; }
 }
 
 function generarLinkConexion() {
@@ -106,8 +90,9 @@ function generarLinkConexion() {
 
 async function ghApiRequest(method, endpoint, body) {
   const cfg = getGhConfig();
-  if (!cfg) throw new Error('Configuración de GitHub no encontrada');
-  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${GH_DATA_PATH}${cfg.branch ? '?ref=' + cfg.branch : ''}`;
+  if (!cfg) throw new Error('Configuracion de GitHub no encontrada');
+  const sep = cfg.branch ? '&' : '?';
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${GH_DATA_PATH}${cfg.branch ? '?ref=' + cfg.branch : ''}${sep}_t=${Date.now()}`;
   const res = await fetch(url, {
     method,
     headers: {
@@ -116,6 +101,7 @@ async function ghApiRequest(method, endpoint, body) {
       'Content-Type': 'application/json',
       'User-Agent': 'Arcano-PWA'
     },
+    cache: 'no-store',
     body: body ? JSON.stringify(body) : undefined
   });
   if (res.status === 404 && method === 'GET') return null;
@@ -126,65 +112,48 @@ async function ghApiRequest(method, endpoint, body) {
   return res.json();
 }
 
-// -------------------- Pull (leer desde GitHub) --------------------
+// -------------------- Pull --------------------
 
 async function ghPull() {
   if (ghSyncInProgress) return false;
   ghSyncInProgress = true;
   try {
     const data = await ghApiRequest('GET');
-    if (!data) {
-      ghRemoteSha = null;
-      return false;
-    }
+    if (!data) { ghRemoteSha = null; return false; }
+    if (data.sha === ghRemoteSha) return false;
+
     ghRemoteSha = data.sha;
     const remoteDB = JSON.parse(atob(data.content));
 
-    // Extraer config embebida del remoto y aplicarla localmente
     if (remoteDB._ghConfig && remoteDB._ghConfig.token && remoteDB._ghConfig.owner && remoteDB._ghConfig.repo) {
-      if (!getGhConfig()) {
-        // No teníamos config: adoptar la del remoto y arrancar polling
-        saveGhConfig(remoteDB._ghConfig);
-        // Se necesita re-hacer el pull con la nueva config
-        ghSyncInProgress = false;
-        return ghPull();
+      if (!getGhConfig()) saveGhConfig(remoteDB._ghConfig);
+    }
+
+    localStorage.setItem(DB_KEY, JSON.stringify(remoteDB));
+    if (remoteDB._ghConfig) saveGhConfig(remoteDB._ghConfig);
+    syncIdCounter(remoteDB);
+
+    // Actualizar referencia del usuario actual
+    if (typeof currentUser !== 'undefined' && currentUser) {
+      const updatedUser = (remoteDB.usuarios || []).find(u => u.id === currentUser.id);
+      if (updatedUser) {
+        currentUser = updatedUser;
+        console.log('[Sync] Usuario actualizado:', currentUser.nombre, currentUser.rol);
+        if (typeof updateUserChip === 'function') updateUserChip();
       }
     }
 
-    // Si no hay datos locales, usar los de GitHub directamente
-    const localRaw = localStorage.getItem(DB_KEY);
-    if (!localRaw || localRaw === '{}') {
-      localStorage.setItem(DB_KEY, JSON.stringify(remoteDB));
-      // Asegurar que la config extraída se persista
-      if (remoteDB._ghConfig) {
-        saveGhConfig(remoteDB._ghConfig);
-      }
-      return true;
-    }
-
-    // Comparar timestamps: usar el más reciente
-    const localDB = JSON.parse(localRaw);
-    const localTs = getMaxTimestamp(localDB);
-    const remoteTs = getMaxTimestamp(remoteDB);
-
-    if (remoteTs > localTs) {
-      // Remoto es más reciente: sobreescribir local
-      localStorage.setItem(DB_KEY, JSON.stringify(remoteDB));
-      if (remoteDB._ghConfig) {
-        saveGhConfig(remoteDB._ghConfig);
-      }
-      return true;
-    }
-    return false;
+    console.log('[Sync] Pull OK - SHA:', ghRemoteSha.slice(0,7));
+    if (typeof updateSyncUI === 'function') updateSyncUI('ok', 'Ahora');
+    return true;
   } catch (err) {
-    console.warn('[GitHub Sync] Error en pull:', err.message);
+    console.warn('[Sync] Pull error:', err.message);
+    if (typeof updateSyncUI === 'function') updateSyncUI('error', 'Pull');
     return false;
-  } finally {
-    ghSyncInProgress = false;
-  }
+  } finally { ghSyncInProgress = false; }
 }
 
-// -------------------- Push (escribir a GitHub) --------------------
+// -------------------- Push --------------------
 
 async function ghPush() {
   if (ghSyncInProgress) return;
@@ -193,57 +162,43 @@ async function ghPush() {
     const dbRaw = localStorage.getItem(DB_KEY);
     if (!dbRaw) return;
     const db = JSON.parse(dbRaw);
-
-    // Embeber la config actual en los datos antes de subir
     const cfg = getGhConfig();
-    if (cfg) {
-      db._ghConfig = { owner: cfg.owner, repo: cfg.repo, branch: cfg.branch, token: cfg.token };
-    }
-
+    if (cfg) db._ghConfig = { owner: cfg.owner, repo: cfg.repo, branch: cfg.branch, token: cfg.token };
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
-
-    const body = {
-      message: 'sync: ' + new Date().toISOString(),
-      content: content
-    };
-
-    if (ghRemoteSha) {
-      body.sha = ghRemoteSha;
-    }
-
+    const body = { message: 'sync: ' + new Date().toISOString(), content };
+    if (ghRemoteSha) body.sha = ghRemoteSha;
     const result = await ghApiRequest('PUT', '', body);
     ghRemoteSha = result.content.sha;
+    ghPushErrors = 0;
+    console.log('[Sync] Push OK - SHA:', ghRemoteSha.slice(0,7));
+    if (typeof updateSyncUI === 'function') updateSyncUI('ok', 'OK');
   } catch (err) {
-    console.warn('[GitHub Sync] Error en push:', err.message);
+    console.warn('[Sync] Push error:', err.message);
+    ghPushErrors++;
+    if (typeof updateSyncUI === 'function') updateSyncUI('error', 'Push');
+    if (ghPushErrors <= 3 && typeof toast === 'function') toast('Error sync: ' + err.message, 'err');
     if (err.message && (err.message.includes('409') || err.message.includes('sha'))) {
       ghRemoteSha = null;
       const pulled = await ghPull();
-      if (pulled) {
-        ghSyncInProgress = false;
-        return ghPush();
-      }
+      if (pulled) { ghSyncInProgress = false; return ghPush(); }
     }
-  } finally {
-    ghSyncInProgress = false;
-  }
+  } finally { ghSyncInProgress = false; }
 }
 
-// -------------------- Timestamp helper --------------------
+// -------------------- Sync ID counter --------------------
 
-function getMaxTimestamp(db) {
-  let maxTs = 0;
-  if (db.ventas && db.ventas.length) {
-    const ventaTs = db.ventas.map(v => new Date(v.fecha).getTime()).sort((a, b) => b - a)[0];
-    maxTs = Math.max(maxTs, ventaTs);
-  }
-  if (db.movimientos && db.movimientos.length) {
-    const movTs = db.movimientos.map(m => new Date(m.fecha).getTime()).sort((a, b) => b - a)[0];
-    maxTs = Math.max(maxTs, movTs);
-  }
-  if (db._lastModified) {
-    maxTs = Math.max(maxTs, new Date(db._lastModified).getTime());
-  }
-  return maxTs;
+function syncIdCounter(db) {
+  try {
+    const allIds = [
+      ...(db.especias||[]).map(e=>e.id||0),
+      ...(db.blends||[]).map(b=>b.id||0),
+      ...(db.ventas||[]).map(v=>v.id||0),
+      ...(db.movimientos||[]).map(m=>m.id||0),
+      ...(db.usuarios||[]).map(u=>u.id||0),
+    ];
+    const maxId = Math.max(0, ...allIds);
+    if (maxId >= _idC) _idC = maxId;
+  } catch {}
 }
 
 // -------------------- Polling --------------------
@@ -251,21 +206,20 @@ function getMaxTimestamp(db) {
 function startGhPolling() {
   stopGhPolling();
   if (!getGhConfig()) return;
-
+  console.log('[Sync] Polling cada', GH_POLL_INTERVAL, 'ms');
   ghPollTimer = setInterval(async () => {
-    const updated = await ghPull();
-    if (updated) {
-      refreshCurrentPage();
-      if (currentUser) toast('Datos actualizados desde GitHub');
-    }
+    try {
+      const updated = await ghPull();
+      if (updated) {
+        refreshCurrentPage();
+        if (currentUser) toast('Datos actualizados');
+      }
+    } catch(e) { console.warn('[Sync] Poll error:', e.message); }
   }, GH_POLL_INTERVAL);
 }
 
 function stopGhPolling() {
-  if (ghPollTimer) {
-    clearInterval(ghPollTimer);
-    ghPollTimer = null;
-  }
+  if (ghPollTimer) { clearInterval(ghPollTimer); ghPollTimer = null; }
 }
 
 // -------------------- Sync al recuperar foco --------------------
@@ -273,10 +227,7 @@ function stopGhPolling() {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && getGhConfig()) {
     ghPull().then(updated => {
-      if (updated) {
-        refreshCurrentPage();
-        if (currentUser) toast('Datos actualizados desde GitHub');
-      }
+      if (updated) { refreshCurrentPage(); if (currentUser) toast('Datos actualizados'); }
     });
   }
 });
@@ -288,87 +239,56 @@ function refreshCurrentPage() {
   if (!activePage) return;
   const pageId = activePage.id.replace('page-', '');
   const renders = {
-    dashboard: renderDashboard,
-    costos: renderCostos,
-    especias: renderEspecias,
-    blends: renderBlends,
-    ventas: renderVentas,
-    reportes: renderReportes,
-    ajustes: renderAjustes,
+    dashboard: renderDashboard, costos: renderCostos, especias: renderEspecias,
+    blends: renderBlends, ventas: renderVentas, reportes: renderReportes, ajustes: renderAjustes,
   };
   if (renders[pageId]) renders[pageId]();
 }
 
-// -------------------- Conexión de prueba --------------------
+// -------------------- Test connection --------------------
 
 async function ghTestConnection() {
   try {
     const cfg = getGhConfig();
-    if (!cfg) return { ok: false, msg: 'Configuración incompleta' };
-
+    if (!cfg) return { ok: false, msg: 'Configuracion incompleta' };
     const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}`;
     const res = await fetch(url, {
-      headers: {
-        'Authorization': 'Bearer ' + cfg.token,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'Arcano-PWA'
-      }
+      cache: 'no-store',
+      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'Arcano-PWA' }
     });
-
     if (!res.ok) {
-      if (res.status === 404) return { ok: false, msg: 'Repositorio no encontrado o sin acceso' };
-      if (res.status === 401) return { ok: false, msg: 'Token inválido o sin permisos' };
-      return { ok: false, msg: `Error ${res.status}: verifica el token y el repositorio` };
+      if (res.status === 404) return { ok: false, msg: 'Repo no encontrado o sin acceso' };
+      if (res.status === 401) return { ok: false, msg: 'Token invalido o sin permisos' };
+      return { ok: false, msg: `Error ${res.status}` };
     }
-
     const dataUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${GH_DATA_PATH}${cfg.branch ? '?ref=' + cfg.branch : ''}`;
     const dataRes = await fetch(dataUrl, {
-      headers: {
-        'Authorization': 'Bearer ' + cfg.token,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'Arcano-PWA'
-      }
+      cache: 'no-store',
+      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'Arcano-PWA' }
     });
-
-    if (dataRes.status === 404) {
-      return { ok: true, msg: 'Conexión OK. Se creará el archivo de datos al guardar.' };
-    }
-
-    if (dataRes.ok) {
-      ghRemoteSha = (await dataRes.json()).sha;
-      return { ok: true, msg: 'Conexión OK. Archivo de datos encontrado.' };
-    }
-
+    if (dataRes.status === 404) return { ok: true, msg: 'Conexion OK. Se creara el archivo al guardar.' };
+    if (dataRes.ok) { ghRemoteSha = (await dataRes.json()).sha; return { ok: true, msg: 'Conexion OK. Archivo encontrado.' }; }
     return { ok: false, msg: 'No se pudo acceder al archivo de datos' };
-  } catch (err) {
-    return { ok: false, msg: err.message };
-  }
+  } catch (err) { return { ok: false, msg: err.message }; }
 }
 
-// -------------------- Inicialización --------------------
+// -------------------- Init --------------------
 
 async function initGithubSync() {
-  // 1. Verificar si hay config por hash de URL (link compartido)
   const hashConfigured = checkHashConfig();
-
   const cfg = getGhConfig();
-  if (!cfg) return false;
-
-  // 2. Pull inicial
-  const updated = await ghPull();
-
-  // 3. Si vino por hash y se acaba de configurar, hacer push para que suba la data local
-  if (hashConfigured) {
-    await ghPush();
-    toast('Configuración recibida por link. Sincronizando...');
+  if (!cfg) {
+    console.log('[Sync] Sin configuracion de GitHub');
+    if (typeof updateSyncUI === 'function') updateSyncUI('error', 'No cfg');
+    return false;
   }
-
-  // 4. SIEMPRE iniciar polling
+  console.log('[Sync] Config:', cfg.owner + '/' + cfg.repo);
+  const updated = await ghPull();
+  if (updated) console.log('[Sync] Datos iniciales descargados');
+  if (hashConfigured) { await ghPush(); toast('Config recibida por link. Sincronizando...'); }
   startGhPolling();
   return true;
 }
-
-// -------------------- Estado de sincronización UI --------------------
 
 function getGhSyncStatus() {
   if (!getGhConfig()) return 'not_configured';
