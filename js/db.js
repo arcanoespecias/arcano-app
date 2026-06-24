@@ -1,3 +1,6 @@
+// ===================== VERSION =====================
+const APP_VERSION = 'v14';
+
 // ===================== ID COUNTER =====================
 let _idC = Date.now();
 const nid = () => ++_idC;
@@ -15,7 +18,9 @@ function getDB() {
       { id: 1, nombre: 'Admin', pin: '1234', rol: 'admin', emoji: '👑' },
       { id: 2, nombre: 'Operador', pin: '0000', rol: 'operador', emoji: '🌿' },
     ],
-    movimientos: []
+    movimientos: [],
+    envases: [],
+    movEnvases: []
   };
   try {
     const saved = JSON.parse(localStorage.getItem(DB_KEY) || '{}');
@@ -27,8 +32,6 @@ let _saveDBTimer = null;
 function saveDB(db) {
   db._lastModified = new Date().toISOString();
   localStorage.setItem(DB_KEY, JSON.stringify(db));
-  // v8: Debounce de 800ms para evitar push por cada tecla (ej: costos oninput)
-  // Se acumulan cambios rapidos y se hace UN solo push al final.
   if (typeof ghPush === 'function' && getGhConfig()) {
     clearTimeout(_saveDBTimer);
     _saveDBTimer = setTimeout(function() { ghPush(); }, 800);
@@ -177,5 +180,13 @@ function seedIfEmpty() {
   ];
   blends.forEach(b => { b.id = nid(); b.pesoChico = 0; b.pesoGrande = 0; b.pVentaChico = 0; b.pVentaGrande = 0; b.notas = ''; });
   db.blends = blends;
+
+  // Seed envases
+  db.envases = [
+    { id: nid(), nombre: 'Envase pequeno', tipo: 'chico', peso: 0, stock: 0, stockMin: 20, precio: 1780 },
+    { id: nid(), nombre: 'Envase grande', tipo: 'grande', peso: 0, stock: 0, stockMin: 10, precio: 1750 },
+  ];
+  db.movEnvases = [];
+
   saveDB(db);
 }
