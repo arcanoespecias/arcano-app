@@ -1,41 +1,53 @@
-// ===================== GITHUB SYNC MODULE v9 =====================
+// ===================== GITHUB SYNC MODULE =====================
+// La config de GitHub se embebe en el archivo de datos sincronizado.
+// Así, una vez que el admin configura, todos los dispositivos lo heredan automáticamente.
+// También soporta auto-config por hash de URL (para compartir link al operador).
 
 const GH_SYNC_KEY = 'arcano_github_config';
-const GH_TOKEN_KEY = 'arcano_gh_token';
 const GH_DATA_PATH = 'data/arcano-data.json';
-const GH_POLL_INTERVAL = 3000;
-
-// Repo hardcodeado: sobrevive al borrado de cache/cookies.
-// Solo se necesita el token (se pide una sola vez y se guarda en localStorage).
-const GH_DEFAULT = { owner: 'arcanoespecias', repo: 'arcano-app', branch: 'main' };
+const GH_POLL_INTERVAL = 3000; // 3 segundos
 
 let ghConfig = null;
-let ghRemoteSha = null;
+let ghRemoteSha = null;       // SHA del archivo en GitHub
 let ghPollTimer = null;
 let ghSyncInProgress = false;
-let ghPushErrors = 0;
+let ghPushErrors = 0;         // contador de errores de push
 
 // -------------------- Config --------------------
 
 function getGhConfig() {
   if (ghConfig) return ghConfig;
-  const token = localStorage.getItem(GH_TOKEN_KEY) || '';
-  if (!token) return null;
-  ghConfig = { owner: GH_DEFAULT.owner, repo: GH_DEFAULT.repo, branch: GH_DEFAULT.branch, token: token };
-  return ghConfig;
-}
-
-function saveGhConfig(config) {
-  ghConfig = config;
-  // Solo guardar el TOKEN en localStorage (lo unico que no se puede hardcodear)
-  if (config.token) localStorage.setItem(GH_TOKEN_KEY, config.token);
-  // Limpiar config vieja si existe
-  localStorage.removeItem(GH_SYNC_KEY);
+  // 1. localStorage local
+  try {
+    const saved = JSON.parse(localStorage.getItem(GH_SYNC_KEY) || 'null');
+    if (saved && saved.token && saved.owner && saved.repo) {
+      ghConfig = saved;
+      return ghConfig;
+    }
+  } catch {}
+  // 2. Config embebida en la DB sincronizada (heredada del admin)
   try {
     const dbRaw = localStorage.getItem(DB_KEY);
     if (dbRaw) {
       const db = JSON.parse(dbRaw);
-      db._ghConfig = { owner: GH_DEFAULT.owner, repo: GH_DEFAULT.repo, branch: GH_DEFAULT.branch };
+      if (db._ghConfig && db._ghConfig.token && db._ghConfig.owner && db._ghConfig.repo) {
+        ghConfig = db._ghConfig;
+        localStorage.setItem(GH_SYNC_KEY, JSON.stringify(ghConfig));
+        return ghConfig;
+      }
+    }
+  } catch {}
+  return null;
+}
+
+function saveGhConfig(config) {
+  ghConfig = config;
+  localStorage.setItem(GH_SYNC_KEY, JSON.stringify(config));
+  try {
+    const dbRaw = localStorage.getItem(DB_KEY);
+    if (dbRaw) {
+      const db = JSON.parse(dbRaw);
+      db._ghConfig = { owner: config.owner, repo: config.repo, branch: config.branch, token: config.token };
       localStorage.setItem(DB_KEY, JSON.stringify(db));
     }
   } catch {}
@@ -44,7 +56,6 @@ function saveGhConfig(config) {
 function clearGhConfig() {
   ghConfig = null;
   ghRemoteSha = null;
-  localStorage.removeItem(GH_TOKEN_KEY);
   localStorage.removeItem(GH_SYNC_KEY);
   try {
     const dbRaw = localStorage.getItem(DB_KEY);
@@ -57,31 +68,41 @@ function clearGhConfig() {
   stopGhPolling();
 }
 
-// -------------------- Auto-config por URL hash (solo token) --------------------
+// -------------------- Auto-config por URL hash --------------------
 
 function checkHashConfig() {
   try {
     const hash = window.location.hash;
-    if (!hash || !hash.startsWith('#tk=')) return false;
-    const token = hash.slice(4);
+    if (!hash || !hash.startsWith('#gh=')) return false;
+    const encoded = hash.slice(4);
     history.replaceState(null, '', window.location.pathname);
-    if (!token) return false;
-    saveGhConfig({ owner: GH_DEFAULT.owner, repo: GH_DEFAULT.repo, branch: GH_DEFAULT.branch, token: token });
+    const parts = decodeURIComponent(atob(encoded)).split('|');
+    if (parts.length < 4) return false;
+    const [owner, repo, branch, token] = parts;
+    if (!owner || !repo || !token) return false;
+    saveGhConfig({ owner, repo, branch: branch || 'main', token });
     return true;
-  } catch { history.replaceState(null, '', window.location.pathname); return false; }
+  } catch {
+    history.replaceState(null, '', window.location.pathname);
+    return false;
+  }
 }
 
 function generarLinkConexion() {
   const cfg = getGhConfig();
   if (!cfg) return '';
-  return window.location.origin + window.location.pathname + '#tk=' + cfg.token;
+  const payload = btoa(unescape(encodeURIComponent(
+    [cfg.owner, cfg.repo, cfg.branch || 'main', cfg.token].join('|')
+  )));
+  return window.location.origin + window.location.pathname + '#gh=' + payload;
 }
 
 // -------------------- API calls --------------------
 
 async function ghApiRequest(method, endpoint, body) {
   const cfg = getGhConfig();
-  if (!cfg) throw new Error('Configuracion de GitHub no encontrada');
+  if (!cfg) throw new Error('Configuración de GitHub no encontrada');
+  // Cache-busting: cada request tiene timestamp unico
   const sep = cfg.branch ? '&' : '?';
   const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${GH_DATA_PATH}${cfg.branch ? '?ref=' + cfg.branch : ''}${sep}_t=${Date.now()}`;
   const res = await fetch(url, {
@@ -103,54 +124,63 @@ async function ghApiRequest(method, endpoint, body) {
   return res.json();
 }
 
-// -------------------- Pull --------------------
+// -------------------- Pull (leer desde GitHub) --------------------
 
 async function ghPull() {
   if (ghSyncInProgress) return false;
   ghSyncInProgress = true;
   try {
     const data = await ghApiRequest('GET');
-    if (!data) { ghRemoteSha = null; return false; }
+    if (!data) {
+      ghRemoteSha = null;
+      return false;
+    }
+
+    // Si el SHA es igual al que ya tenemos, no hay cambios
     if (data.sha === ghRemoteSha) return false;
 
+    // El SHA cambió: hay datos nuevos
     ghRemoteSha = data.sha;
-    // v8: Decodificacion UTF-8 correcta. atob() devuelve bytes sueltos (Latin-1),
-    // pero el JSON original tiene caracteres UTF-8 multibyte (á,é,ñ,etc).
-    // Sin TextDecoder, cada byte UTF-8 se trata como un char independiente,
-    // causando mojibake (Ã©, Ã³) que se duplica en cada ciclo push/pull.
+    // v8: UTF-8 safe decode
     const binStr = atob(data.content);
     const bytes = new Uint8Array(binStr.length);
     for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
     const remoteDB = JSON.parse(new TextDecoder('utf-8').decode(bytes));
 
-    // Merge config remota con token local (remoto NUNCA tiene token)
-    // Limpiar _ghConfig del remoto (siempre usar el hardcodeado)
-    if (remoteDB._ghConfig) delete remoteDB._ghConfig;
+    // Extraer config embebida del remoto
+    if (remoteDB._ghConfig && remoteDB._ghConfig.token && remoteDB._ghConfig.owner && remoteDB._ghConfig.repo) {
+      if (!getGhConfig()) {
+        saveGhConfig(remoteDB._ghConfig);
+      }
+    }
 
+    // Actualizar localStorage con los datos remotos
     localStorage.setItem(DB_KEY, JSON.stringify(remoteDB));
+    if (remoteDB._ghConfig) {
+      saveGhConfig(remoteDB._ghConfig);
+    }
     syncIdCounter(remoteDB);
 
-    // Actualizar referencia del usuario actual
+    // Actualizar la referencia del usuario actual si el rol cambio remotamente
     if (typeof currentUser !== 'undefined' && currentUser) {
       const updatedUser = (remoteDB.usuarios || []).find(u => u.id === currentUser.id);
       if (updatedUser) {
         currentUser = updatedUser;
-        console.log('[Sync] Usuario actualizado:', currentUser.nombre, currentUser.rol);
+        console.log('[GitHub Sync] Usuario actualizado:', currentUser.nombre, 'rol:', currentUser.rol);
         if (typeof updateUserChip === 'function') updateUserChip();
       }
     }
 
-    console.log('[Sync] Pull OK - SHA:', ghRemoteSha.slice(0,7));
-    if (typeof updateSyncUI === 'function') updateSyncUI('ok', 'Ahora');
     return true;
   } catch (err) {
-    console.warn('[Sync] Pull error:', err.message);
-    if (typeof updateSyncUI === 'function') updateSyncUI('error', 'Pull');
+    console.warn('[GitHub Sync] Error en pull:', err.message);
     return false;
-  } finally { ghSyncInProgress = false; }
+  } finally {
+    ghSyncInProgress = false;
+  }
 }
 
-// -------------------- Push --------------------
+// -------------------- Push (escribir a GitHub) --------------------
 
 async function ghPush() {
   if (ghSyncInProgress) return;
@@ -159,42 +189,60 @@ async function ghPush() {
     const dbRaw = localStorage.getItem(DB_KEY);
     if (!dbRaw) return;
     const db = JSON.parse(dbRaw);
+
+    // Embeber la config actual en los datos antes de subir
     const cfg = getGhConfig();
-    // NUNCA incluir el token en el contenido que se sube a GitHub
-    if (cfg) db._ghConfig = { owner: GH_DEFAULT.owner, repo: GH_DEFAULT.repo, branch: GH_DEFAULT.branch };
-    // Doble seguridad: eliminar cualquier token residual que pudiera haber quedado
-    if (db._ghConfig && db._ghConfig.token) delete db._ghConfig.token;
+    if (cfg) {
+      db._ghConfig = { owner: cfg.owner, repo: cfg.repo, branch: cfg.branch, token: cfg.token };
+    }
+
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
-    const body = { message: 'sync: ' + new Date().toISOString(), content };
-    if (ghRemoteSha) body.sha = ghRemoteSha;
+
+    const body = {
+      message: 'sync: ' + new Date().toISOString(),
+      content: content
+    };
+
+    if (ghRemoteSha) {
+      body.sha = ghRemoteSha;
+    }
+
     const result = await ghApiRequest('PUT', '', body);
     ghRemoteSha = result.content.sha;
-    ghPushErrors = 0;
-    console.log('[Sync] Push OK - SHA:', ghRemoteSha.slice(0,7));
-    if (typeof updateSyncUI === 'function') updateSyncUI('ok', 'OK');
+    ghPushErrors = 0; // resetear contador de errores
+    console.log('[GitHub Sync] ✅ Push exitoso, SHA:', ghRemoteSha.slice(0,7));
   } catch (err) {
-    console.warn('[Sync] Push error:', err.message);
+    console.warn('[GitHub Sync] Error en push:', err.message);
     ghPushErrors++;
-    if (typeof updateSyncUI === 'function') updateSyncUI('error', 'Push');
-    if (ghPushErrors <= 3 && typeof toast === 'function') toast('Error sync: ' + err.message, 'err');
+    // Mostrar error al usuario (maximo 1 vez cada 30 segundos)
+    if (ghPushErrors <= 2 && typeof toast === 'function') {
+      toast('Error al sincronizar con GitHub: ' + err.message, 'err');
+    }
     if (err.message && (err.message.includes('409') || err.message.includes('sha'))) {
       ghRemoteSha = null;
       const pulled = await ghPull();
-      if (pulled) { ghSyncInProgress = false; return ghPush(); }
+      if (pulled) {
+        ghSyncInProgress = false;
+        return ghPush();
+      }
     }
-  } finally { ghSyncInProgress = false; }
+  } finally {
+    ghSyncInProgress = false;
+  }
 }
 
-// -------------------- Sync ID counter --------------------
+// -------------------- Sincronizar contador de IDs --------------------
 
 function syncIdCounter(db) {
   try {
     const allIds = [
-      ...(db.especias||[]).map(e=>e.id||0),
-      ...(db.blends||[]).map(b=>b.id||0),
-      ...(db.ventas||[]).map(v=>v.id||0),
-      ...(db.movimientos||[]).map(m=>m.id||0),
-      ...(db.usuarios||[]).map(u=>u.id||0),
+      ...(db.especias || []).map(e => e.id || 0),
+      ...(db.blends || []).map(b => b.id || 0),
+      ...(db.ventas || []).map(v => v.id || 0),
+      ...(db.movimientos || []).map(m => m.id || 0),
+      ...(db.usuarios || []).map(u => u.id || 0),
+      ...(db.envases || []).map(e => e.id || 0),
+      ...(db.movEnvases || []).map(m => m.id || 0),
     ];
     const maxId = Math.max(0, ...allIds);
     if (maxId >= _idC) _idC = maxId;
@@ -206,20 +254,29 @@ function syncIdCounter(db) {
 function startGhPolling() {
   stopGhPolling();
   if (!getGhConfig()) return;
-  console.log('[Sync] Polling cada', GH_POLL_INTERVAL, 'ms');
+
+  console.log('[GitHub Sync] Polling iniciado cada', GH_POLL_INTERVAL, 'ms');
   ghPollTimer = setInterval(async () => {
     try {
       const updated = await ghPull();
       if (updated) {
+        console.log('[GitHub Sync] ✅ Datos actualizados desde GitHub - refrescando UI');
         refreshCurrentPage();
-        if (currentUser) toast('Datos actualizados');
+        if (currentUser) toast('Datos actualizados desde GitHub');
+      } else {
+        console.log('[GitHub Sync] Poll: sin cambios (SHA:', ghRemoteSha ? ghRemoteSha.slice(0,7) : 'null', ')');
       }
-    } catch(e) { console.warn('[Sync] Poll error:', e.message); }
+    } catch(err) {
+      console.warn('[GitHub Sync] Error en poll:', err.message);
+    }
   }, GH_POLL_INTERVAL);
 }
 
 function stopGhPolling() {
-  if (ghPollTimer) { clearInterval(ghPollTimer); ghPollTimer = null; }
+  if (ghPollTimer) {
+    clearInterval(ghPollTimer);
+    ghPollTimer = null;
+  }
 }
 
 // -------------------- Sync al recuperar foco --------------------
@@ -227,7 +284,10 @@ function stopGhPolling() {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && getGhConfig()) {
     ghPull().then(updated => {
-      if (updated) { refreshCurrentPage(); if (currentUser) toast('Datos actualizados'); }
+      if (updated) {
+        refreshCurrentPage();
+        if (currentUser) toast('Datos actualizados desde GitHub');
+      }
     });
   }
 });
@@ -239,128 +299,99 @@ function refreshCurrentPage() {
   if (!activePage) return;
   const pageId = activePage.id.replace('page-', '');
   const renders = {
-    dashboard: renderDashboard, costos: renderCostos, especias: renderEspecias,
-    blends: renderBlends, ventas: renderVentas, reportes: renderReportes, ajustes: renderAjustes,
+    dashboard: renderDashboard,
+    costos: renderCostos,
+    especias: renderEspecias,
+    blends: renderBlends,
+    productos: renderProductos,
+    envases: renderEnvases,
+    ventas: renderVentas,
+    reportes: renderReportes,
+    ajustes: renderAjustes,
   };
   if (renders[pageId]) renders[pageId]();
 }
 
-// -------------------- Test connection --------------------
+// -------------------- Conexión de prueba --------------------
 
 async function ghTestConnection() {
   try {
     const cfg = getGhConfig();
-    if (!cfg) return { ok: false, msg: 'Configuracion incompleta' };
+    if (!cfg) return { ok: false, msg: 'Configuración incompleta' };
+
     const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}`;
     const res = await fetch(url, {
       cache: 'no-store',
-      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'Arcano-PWA' }
+      headers: {
+        'Authorization': 'Bearer ' + cfg.token,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Arcano-PWA'
+      }
     });
+
     if (!res.ok) {
-      if (res.status === 404) return { ok: false, msg: 'Repo no encontrado o sin acceso' };
-      if (res.status === 401) return { ok: false, msg: 'Token invalido o sin permisos' };
-      return { ok: false, msg: `Error ${res.status}` };
+      if (res.status === 404) return { ok: false, msg: 'Repositorio no encontrado o sin acceso' };
+      if (res.status === 401) return { ok: false, msg: 'Token inválido o sin permisos' };
+      return { ok: false, msg: `Error ${res.status}: verifica el token y el repositorio` };
     }
+
     const dataUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${GH_DATA_PATH}${cfg.branch ? '?ref=' + cfg.branch : ''}`;
     const dataRes = await fetch(dataUrl, {
       cache: 'no-store',
-      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'Arcano-PWA' }
+      headers: {
+        'Authorization': 'Bearer ' + cfg.token,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Arcano-PWA'
+      }
     });
-    if (dataRes.status === 404) return { ok: true, msg: 'Conexion OK. Se creara el archivo al guardar.' };
-    if (dataRes.ok) { ghRemoteSha = (await dataRes.json()).sha; return { ok: true, msg: 'Conexion OK. Archivo encontrado.' }; }
+
+    if (dataRes.status === 404) {
+      return { ok: true, msg: 'Conexión OK. Se creará el archivo de datos al guardar.' };
+    }
+
+    if (dataRes.ok) {
+      ghRemoteSha = (await dataRes.json()).sha;
+      return { ok: true, msg: 'Conexión OK. Archivo de datos encontrado.' };
+    }
+
     return { ok: false, msg: 'No se pudo acceder al archivo de datos' };
-  } catch (err) { return { ok: false, msg: err.message }; }
+  } catch (err) {
+    return { ok: false, msg: err.message };
+  }
 }
 
-// -------------------- Init --------------------
+// -------------------- Inicialización --------------------
 
 async function initGithubSync() {
+  // 1. Verificar si hay config por hash de URL (link compartido)
   const hashConfigured = checkHashConfig();
-
-  // Limpiar token del DB local si existe (versiones viejas lo guardaban ahi)
-  try {
-    const dbRaw = localStorage.getItem(DB_KEY);
-    if (dbRaw) {
-      const db = JSON.parse(dbRaw);
-      if (db._ghConfig && db._ghConfig.token) {
-        delete db._ghConfig.token;
-        localStorage.setItem(DB_KEY, JSON.stringify(db));
-        console.log('[Sync] Token removido del DB local (limpieza v8)');
-      }
-    }
-  } catch {}
 
   const cfg = getGhConfig();
   if (!cfg) {
-    console.log('[Sync] Sin token - mostrando pantalla de token');
-    if (typeof showTokenScreen === 'function') showTokenScreen();
+    console.log('[GitHub Sync] Sin configuración de GitHub');
     return false;
   }
-  console.log('[Sync] Config:', cfg.owner + '/' + cfg.repo);
+
+  console.log('[GitHub Sync] Configuración encontrada:', cfg.owner + '/' + cfg.repo);
+
+  // 2. Pull inicial
   const updated = await ghPull();
-  if (updated) console.log('[Sync] Datos iniciales descargados');
-  if (hashConfigured) { await ghPush(); toast('Token recibido por link. Sincronizando...'); }
+  if (updated) {
+    console.log('[GitHub Sync] Datos iniciales descargados de GitHub');
+  }
+
+  // 3. Si vino por hash y se acaba de configurar, hacer push
+  if (hashConfigured) {
+    await ghPush();
+    toast('Configuración recibida por link. Sincronizando...');
+  }
+
+  // 4. SIEMPRE iniciar polling
   startGhPolling();
   return true;
 }
 
-// -------------------- Token Screen --------------------
-// Se muestra cuando no hay token (ej: despues de borrar cache/cookies).
-// El usuario pega el token una vez y todos los datos se sincronizan desde GitHub.
-
-function showTokenScreen() {
-  const pinScreen = document.getElementById('pin-screen');
-  if (!pinScreen) return;
-  pinScreen.style.display = 'flex';
-  pinScreen.innerHTML = `
-    <img src="icons/logo-pin.png?v=9" style="width:70px;height:70px;margin-bottom:8px;object-fit:contain">
-    <div class="pin-logo">Arcano</div>
-    <div class="pin-sub">Ingresa tu token de GitHub</div>
-    <p style="color:var(--muted);font-size:.78rem;max-width:280px;text-align:center;margin:12px 0">
-      Se necesita una sola vez. Despues los datos se sincronizan automaticamente.
-    </p>
-    <div style="width:100%;max-width:320px">
-      <input type="password" id="token-input" placeholder="ghp_xxxx..."
-        style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--fg);font-size:.9rem;padding:12px;outline:none;text-align:center">
-      <button class="btn btn-gold btn-full" style="margin-top:10px" onclick="conectarConToken()">Conectar</button>
-    </div>
-    <div id="token-err" style="color:#e07070;font-size:.8rem;min-height:18px;margin-top:6px"></div>
-  `;
-}
-
-async function conectarConToken() {
-  const token = (document.getElementById('token-input') || {}).value || '';
-  const errEl = document.getElementById('token-err');
-  if (!token.trim()) { if (errEl) errEl.textContent = 'Pegá tu token de GitHub'; return; }
-  if (errEl) errEl.textContent = 'Conectando...';
-  // Probar conexion
-  saveGhConfig({ owner: GH_DEFAULT.owner, repo: GH_DEFAULT.repo, branch: GH_DEFAULT.branch, token: token.trim() });
-  const result = await ghTestConnection();
-  if (result.ok) {
-    toast('Conectado! Descargando datos...');
-    const updated = await ghPull();
-    if (updated) {
-      // Datos descargados, iniciar app
-      startGhPolling();
-      document.getElementById('pin-screen').style.display = 'none';
-      seedIfEmpty();
-      initPin();
-      renderGhAjustes();
-      if (typeof updateSyncUI === 'function') updateSyncUI('ok', 'OK');
-    } else {
-      // No hay archivo de datos en GitHub - usar datos locales si existen
-      startGhPolling();
-      document.getElementById('pin-screen').style.display = 'none';
-      seedIfEmpty();
-      initPin();
-      renderGhAjustes();
-      if (typeof updateSyncUI === 'function') updateSyncUI('ok', 'Nuevo');
-    }
-  } else {
-    clearGhConfig();
-    if (errEl) errEl.textContent = result.msg || 'Token invalido';
-  }
-}
+// -------------------- Estado de sincronización UI --------------------
 
 function getGhSyncStatus() {
   if (!getGhConfig()) return 'not_configured';
