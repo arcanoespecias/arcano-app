@@ -10,11 +10,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Arcano">
-<link rel="icon" type="image/png" href="icons/favicon.png?v=14">
-<link rel="apple-touch-icon" href="icons/icon-192.png?v=14">
+<link rel="icon" type="image/png" href="icons/favicon.png?v=15">
+<link rel="apple-touch-icon" href="icons/icon-192.png?v=15">
 <title>Arcano — Complice del Sabor</title>
-<link rel="manifest" href="manifest.json?v=14">
-<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="manifest" href="manifest.json?v=15">
+<link rel="stylesheet" href="css/style.css?v=15">
 <script>
 (function(){
   try {
@@ -33,7 +33,7 @@
 <!-- PWA INSTALL BANNER -->
 <div id="pwa-banner" style="display:none">
   <div class="pwa-banner-inner">
-    <img src="icons/icon-192.png?v=14" alt="" style="width:40px;height:40px;border-radius:8px">
+    <img src="icons/icon-192.png?v=15" alt="" style="width:40px;height:40px;border-radius:8px">
     <div class="pwa-banner-text"><div class="fw7 text-sm">Instalar Arcano</div><div class="text-xs text-muted">Acceso rapido desde tu pantalla de inicio</div></div>
     <button class="btn btn-gold btn-sm" onclick="installPWA()">Instalar</button>
     <button class="btn btn-ghost btn-sm" onclick="dismissPWA()" style="padding:5px 8px;font-size:.9rem">x</button>
@@ -45,7 +45,7 @@
 <!-- HEADER -->
 <div id="app-header">
   <div class="header-logo">
-    <img src="icons/logo-header.png?v=14" alt="Arcano" style="width:34px;height:34px;border-radius:50%;object-fit:cover">
+    <img src="icons/logo-header.png?v=15" alt="Arcano" style="width:34px;height:34px;border-radius:50%;object-fit:cover">
     <div><div class="header-brand">Arcano</div><div class="header-sub">Complice del Sabor</div></div>
   </div>
   <div class="header-pin">
@@ -165,7 +165,7 @@
     <div class="section-title mb-12">Tipografia</div>
     <div class="g2 mb-16"><div><label>Tamano base <span id="pwa-cfg-fs-base-val" class="text-gold">15px</span></label><input id="pwa-cfg-fs-base" type="range" min="11" max="20" step="1" value="15" oninput="previewPWA()"></div><div><label>Tamano titulos <span id="pwa-cfg-fs-title-val" class="text-gold">1.9rem</span></label><input id="pwa-cfg-fs-title" type="range" min="1.0" max="3.0" step="0.1" value="1.9" oninput="previewPWA()"></div></div>
     <hr class="divider">
-    <div class="cost-box mb-16" id="pwa-preview-box"><div class="text-xs text-muted mb-12">Vista previa</div><div class="flex items-center gap-8"><img src="icons/icon-192.png?v=14" style="width:36px;height:36px;border-radius:8px"><div><div class="fw7 text-sm" id="pwa-preview-name">Arcano</div><div class="text-xs text-muted" id="pwa-preview-desc">Complice del Sabor</div></div></div></div>
+    <div class="cost-box mb-16" id="pwa-preview-box"><div class="text-xs text-muted mb-12">Vista previa</div><div class="flex items-center gap-8"><img src="icons/icon-192.png?v=15" style="width:36px;height:36px;border-radius:8px"><div><div class="fw7 text-sm" id="pwa-preview-name">Arcano</div><div class="text-xs text-muted" id="pwa-preview-desc">Complice del Sabor</div></div></div></div>
     <div class="flex gap-8"><button class="btn btn-gold" style="flex:1" onclick="guardarPWAConfig()">Guardar</button><button class="btn btn-ghost" style="flex:1" onclick="resetPWAConfig()">Restaurar</button></div>
   </div>
   <div class="g2">
@@ -200,10 +200,10 @@
 <!-- MODAL STOCK ENVASE -->
 <div class="modal-overlay" id="modal-env-stock"><div class="modal"><div class="modal-header"><span class="modal-title" id="me-nombre">Stock envase</span><button class="modal-close" onclick="closeModal('modal-env-stock')">x</button></div><div id="alert-env-stock" class="alert"></div><input type="hidden" id="me-env-id"><div class="cost-box mb-16"><div class="cost-row"><span>Stock actual</span><span class="fw7 text-gold" id="me-stock-actual">—</span></div></div><div class="fr"><div><label>Tipo</label><select id="me-tipo"><option value="entrada">Entrada (compra)</option><option value="salida">Salida (uso/merma)</option></select></div><div><label>Cantidad (unidades)</label><input id="me-cantidad" type="number" min="0" placeholder="0"></div></div><div class="fr fr1"><div><label>Nota</label><input id="me-nota" placeholder="Ej: Compra proveedor"></div></div><button class="btn btn-gold btn-full mb-16" onclick="guardarMovEnvase()">Registrar movimiento</button><h3>Historial</h3><div id="me-historial"></div></div></div>
 
-<script src="js/db.js?v=14"></script>
-<script src="js/github-sync.js?v=14"></script>
-<script src="js/modules1.js?v=14"></script>
-<script src="js/modules2.js?v=14"></script>
+<script src="js/db.js?v=15"></script>
+<script src="js/github-sync.js?v=15"></script>
+<script src="js/modules1.js?v=15"></script>
+<script src="js/modules2.js?v=15"></script>
 <script>
   function updateSyncUI(status, detail) {
     var dot=document.getElementById('sync-dot'),txt=document.getElementById('sync-text');
@@ -224,8 +224,11 @@
     if(bEnv) bEnv.style.display = (currentUser && currentUser.rol === 'admin' && name === 'envases') ? '' : 'none';
   };
 
+  // GitHub defaults — used by guardarGhConfigUI() in modules2.js
+  var GH_DEFAULT = { owner: 'arcanoespecias', repo: 'arcano-app', branch: 'main' };
+
   async function bootApp() {
-    console.log('[Arcano] v14 - Productos + Envases + cache fix');
+    console.log('[Arcano] v15 - fix GH_DEFAULT conexion GitHub');
     // Version check: force reload if old version cached
     var storedVer = localStorage.getItem('arcano_app_version');
     if (storedVer && storedVer !== APP_VERSION) {
