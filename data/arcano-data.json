@@ -3,10 +3,10 @@
     "envChico": 1780,
     "envGrande": 1750,
     "pkgChico": 250,
-    "pkgGrande": 280,
+    "pkgGrande": 300,
     "etiqueta": 300,
     "mo": 600,
-    "otros": 1200
+    "otros": 4200
   },
   "especias": [
     {
@@ -646,7 +646,7 @@
       "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T21:53:07.415Z",
+  "_lastModified": "2026-06-24T21:53:24.942Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
