@@ -48,14 +48,14 @@
       "nombre": "Paprika",
       "precioKg": 17000,
       "id": 1782264912991,
-      "stock": 2000,
+      "stock": 0,
       "stockMin": 500
     },
     {
-      "nombre": "PimentÃ³n en escamas",
+      "nombre": "PimentÃÂ³n en escamas",
       "precioKg": 0,
       "id": 1782264912992,
-      "stock": 0,
+      "stock": 100000,
       "stockMin": 500
     },
     {
@@ -66,7 +66,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "OrÃ©gano",
+      "nombre": "OrÃÂ©gano",
       "precioKg": 20000,
       "id": 1782264912994,
       "stock": 0,
@@ -136,7 +136,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "Pimienta comÃºn",
+      "nombre": "Pimienta comÃÂºn",
       "precioKg": 39000,
       "id": 1782264913004,
       "stock": 0,
@@ -220,7 +220,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "CÃºrcuma",
+      "nombre": "CÃÂºrcuma",
       "precioKg": 16800,
       "id": 1782264913016,
       "stock": 0,
@@ -234,7 +234,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "AnÃ­s estrellado",
+      "nombre": "AnÃÂ­s estrellado",
       "precioKg": 0,
       "id": 1782264913018,
       "stock": 0,
@@ -296,7 +296,7 @@
       "notas": ""
     },
     {
-      "nombre": "CajÃºn",
+      "nombre": "CajÃÂºn",
       "ingredientes": [
         {
           "espId": 1782264912991,
@@ -353,7 +353,7 @@
         },
         {
           "espId": 1782264912994,
-          "nombre": "OrÃ©gano",
+          "nombre": "OrÃÂ©gano",
           "gramos": 200,
           "precioKg": 20000
         },
@@ -459,7 +459,7 @@
         },
         {
           "espId": 1782264912994,
-          "nombre": "OrÃ©gano",
+          "nombre": "OrÃÂ©gano",
           "gramos": 100,
           "precioKg": 20000
         },
@@ -506,7 +506,7 @@
         },
         {
           "espId": 1782264912994,
-          "nombre": "OrÃ©gano",
+          "nombre": "OrÃÂ©gano",
           "gramos": 100,
           "precioKg": 20000
         }
@@ -525,14 +525,14 @@
       "nombre": "Admin",
       "pin": "0621",
       "rol": "admin",
-      "emoji": "ð",
+      "emoji": "Ã°ÂÂÂ",
       "id": 1
     },
     {
       "nombre": "Operador",
       "pin": "0621",
       "rol": "operador",
-      "emoji": "ð¿",
+      "emoji": "Ã°ÂÂÂ¿",
       "id": 2
     }
   ],
@@ -574,16 +574,16 @@
       "usuario": "Admin"
     },
     {
-      "id": 1782309077095,
-      "espId": 1782264912991,
+      "id": 1782309108484,
+      "espId": 1782264912992,
       "tipo": "entrada",
-      "cantidad": 2000,
+      "cantidad": 100000,
       "nota": "",
-      "fecha": "2026-06-24T13:51:31.755Z",
-      "usuario": "Operador"
+      "fecha": "2026-06-24T13:52:01.781Z",
+      "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T13:51:31.755Z",
+  "_lastModified": "2026-06-24T13:52:01.781Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
