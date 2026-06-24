@@ -161,6 +161,21 @@ async function ghPull() {
     }
     syncIdCounter(remoteDB);
 
+    // v16: Force reload si el admin pidió actualización
+    var localReload = 0;
+    try { localReload = parseInt(localStorage.getItem('arcano_force_reload') || '0'); } catch(e){}
+    if (remoteDB._forceReloadAt && remoteDB._forceReloadAt > localReload) {
+      console.log('[GitHub Sync] Force reload solicitado por admin: ' + remoteDB._forceReloadAt);
+      localStorage.setItem('arcano_force_reload', String(remoteDB._forceReloadAt));
+      // Limpiar TODOS los caches y forzar recarga dura
+      if ('caches' in window) { caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }); }
+      if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(function(regs){ regs.forEach(function(r){ r.unregister(); }); }); }
+      setTimeout(function(){
+        window.location.replace(window.location.pathname + '?_r=' + Date.now());
+      }, 300);
+      return true;
+    }
+
     // Actualizar la referencia del usuario actual si el rol cambio remotamente
     if (typeof currentUser !== 'undefined' && currentUser) {
       const updatedUser = (remoteDB.usuarios || []).find(u => u.id === currentUser.id);
