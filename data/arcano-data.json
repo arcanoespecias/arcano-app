@@ -55,7 +55,7 @@
       "nombre": "Pimenton en escamas",
       "precioKg": 0,
       "id": 1782314399457,
-      "stock": 0,
+      "stock": 6436436,
       "stockMin": 500
     },
     {
@@ -581,9 +581,18 @@
       "nota": "",
       "fecha": "2026-06-24T16:15:40.506Z",
       "usuario": "Admin"
+    },
+    {
+      "id": 1782319982411,
+      "espId": 1782314399457,
+      "tipo": "entrada",
+      "cantidad": 6436436,
+      "nota": "",
+      "fecha": "2026-06-24T16:53:31.002Z",
+      "usuario": "Operador"
     }
   ],
-  "_lastModified": "2026-06-24T16:15:40.506Z",
+  "_lastModified": "2026-06-24T16:53:31.002Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
