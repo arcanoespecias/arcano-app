@@ -52,7 +52,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "Pimentón en escamas",
+      "nombre": "PimentÃ³n en escamas",
       "precioKg": 0,
       "id": 1782264912992,
       "stock": 0,
@@ -66,7 +66,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "Orégano",
+      "nombre": "OrÃ©gano",
       "precioKg": 20000,
       "id": 1782264912994,
       "stock": 0,
@@ -136,7 +136,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "Pimienta común",
+      "nombre": "Pimienta comÃºn",
       "precioKg": 39000,
       "id": 1782264913004,
       "stock": 0,
@@ -220,7 +220,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "Cúrcuma",
+      "nombre": "CÃºrcuma",
       "precioKg": 16800,
       "id": 1782264913016,
       "stock": 0,
@@ -234,7 +234,7 @@
       "stockMin": 500
     },
     {
-      "nombre": "Anís estrellado",
+      "nombre": "AnÃ­s estrellado",
       "precioKg": 0,
       "id": 1782264913018,
       "stock": 0,
@@ -296,7 +296,7 @@
       "notas": ""
     },
     {
-      "nombre": "Cajún",
+      "nombre": "CajÃºn",
       "ingredientes": [
         {
           "espId": 1782264912991,
@@ -353,7 +353,7 @@
         },
         {
           "espId": 1782264912994,
-          "nombre": "Orégano",
+          "nombre": "OrÃ©gano",
           "gramos": 200,
           "precioKg": 20000
         },
@@ -459,7 +459,7 @@
         },
         {
           "espId": 1782264912994,
-          "nombre": "Orégano",
+          "nombre": "OrÃ©gano",
           "gramos": 100,
           "precioKg": 20000
         },
@@ -506,7 +506,7 @@
         },
         {
           "espId": 1782264912994,
-          "nombre": "Orégano",
+          "nombre": "OrÃ©gano",
           "gramos": 100,
           "precioKg": 20000
         }
@@ -525,14 +525,14 @@
       "nombre": "Admin",
       "pin": "0621",
       "rol": "admin",
-      "emoji": "👑",
+      "emoji": "ð",
       "id": 1
     },
     {
       "nombre": "Operador",
       "pin": "0621",
       "rol": "operador",
-      "emoji": "🌿",
+      "emoji": "ð¿",
       "id": 2
     }
   ],
@@ -574,5 +574,10 @@
       "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T03:54:17.634Z"
+  "_lastModified": "2026-06-24T03:54:17.634Z",
+  "_ghConfig": {
+    "owner": "arcanoespecias",
+    "repo": "arcano-app",
+    "branch": "main"
+  }
 }
