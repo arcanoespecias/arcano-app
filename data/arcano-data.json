@@ -76,7 +76,7 @@
       "nombre": "Albahaca",
       "precioKg": 26400,
       "id": 1782314399460,
-      "stock": 0,
+      "stock": 50000,
       "stockMin": 500
     },
     {
@@ -599,9 +599,18 @@
       "nota": "",
       "fecha": "2026-06-24T20:45:19.232Z",
       "usuario": "Operador"
+    },
+    {
+      "id": 1782333901720,
+      "espId": 1782314399460,
+      "tipo": "entrada",
+      "cantidad": 50000,
+      "nota": "",
+      "fecha": "2026-06-24T20:45:42.379Z",
+      "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T20:45:19.232Z",
+  "_lastModified": "2026-06-24T20:45:42.379Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
