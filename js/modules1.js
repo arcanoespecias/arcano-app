@@ -87,7 +87,7 @@ function initPin() {
   var screen = document.getElementById('pin-screen'), db = getDB();
   try { var saved=JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); if(saved&&saved.userId){var u=db.usuarios.find(function(x){return x.id===saved.userId});if(u){currentUser=u;screen.style.display='none';updateUserChip();renderDashboard();return;}} } catch{}
   function showUserList() {
-    screen.innerHTML = '<div style="text-align:center"><img src="icons/logo-pin.png?v=16" style="width:80px;height:80px;margin-bottom:4px;object-fit:contain"><div class="pin-logo">Arcano</div><div class="pin-sub">Complice del Sabor</div></div><div class="user-list" style="margin-top:8px">' +
+    screen.innerHTML = '<div style="text-align:center"><img src="icons/logo-pin.png?v=17" style="width:80px;height:80px;margin-bottom:4px;object-fit:contain"><div class="pin-logo">Arcano</div><div class="pin-sub">Complice del Sabor</div></div><div class="user-list" style="margin-top:8px">' +
       db.usuarios.map(function(u){return '<button class="user-btn" onclick="selectUser('+u.id+')"><div class="user-avatar">'+u.emoji+'</div><div><div style="font-size:.95rem;font-weight:700">'+u.nombre+'</div><div style="font-size:.7rem;color:var(--muted)">'+u.rol+'</div></div></button>';}).join('') + '</div>';
   }
   window.selectUser = function(uid) {
