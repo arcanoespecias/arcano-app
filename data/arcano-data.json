@@ -41,7 +41,7 @@
       "nombre": "Cebolla en escamas",
       "precioKg": 0,
       "id": 1782314399455,
-      "stock": 0,
+      "stock": 2968698538542,
       "stockMin": 500
     },
     {
@@ -554,9 +554,18 @@
       "nota": "",
       "fecha": "2026-06-24T15:32:01.344Z",
       "usuario": "Admin"
+    },
+    {
+      "id": 1782315083530,
+      "espId": 1782314399455,
+      "tipo": "entrada",
+      "cantidad": 2968698538542,
+      "nota": "",
+      "fecha": "2026-06-24T15:32:26.729Z",
+      "usuario": "Operador"
     }
   ],
-  "_lastModified": "2026-06-24T15:32:01.344Z",
+  "_lastModified": "2026-06-24T15:32:26.729Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
