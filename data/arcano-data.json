@@ -52,11 +52,11 @@
       "stockMin": 500
     },
     {
-      "nombre": "PimentÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³n en escamas",
+      "nombre": "Pimentón  en escamas",
       "precioKg": 0,
-      "id": 1782264912992,
-      "stock": 100000,
-      "stockMin": 500
+      "stock": 9999,
+      "stockMin": 500,
+      "id": 1782264912992
     },
     {
       "nombre": "Paprika ahumada",
@@ -601,7 +601,7 @@
       "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T13:56:39.649Z",
+  "_lastModified": "2026-06-24T13:57:13.808Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
