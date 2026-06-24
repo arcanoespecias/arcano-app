@@ -2,11 +2,11 @@
   "costos": {
     "envChico": 1780,
     "envGrande": 1750,
-    "pkgChico": 0,
+    "pkgChico": 250,
     "pkgGrande": 0,
     "etiqueta": 300,
     "mo": 600,
-    "otros": 0
+    "otros": 1200
   },
   "especias": [
     {
@@ -646,7 +646,7 @@
       "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T21:51:28.846Z",
+  "_lastModified": "2026-06-24T21:52:57.496Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
