@@ -221,6 +221,16 @@ function copiarLinkConexion(){var l=generarLinkConexion();if(!l){toast('No hay c
 function guardarGhConfigUI(){var t=document.getElementById('gh-token').value.trim();if(!t){toast('Pega tu token','err');return;}saveGhConfig({owner:GH_DEFAULT.owner,repo:GH_DEFAULT.repo,branch:GH_DEFAULT.branch,token:t});startGhPolling();ghPush().then(function(){toast('Conectado');renderGhAjustes();});}
 async function forzarSyncManual(){toast('Sincronizando...');var p=await ghPull();if(p){toast('Datos actualizados');refreshCurrentPage();}else{await ghPush();toast('Datos subidos');}}
 function desconectarGh(){if(!confirm('¿Desconectar sync?'))return;clearGhConfig();renderGhAjustes();toast('Desconectado');}
+function forceReloadAllDevices(){
+  if(!confirm('Esto actualizara la app en TODOS los dispositivos conectados. Continuar?'))return;
+  var db=getDB();
+  var ts=Date.now();
+  db._forceReloadAt=ts;
+  localStorage.setItem('arcano_force_reload',String(ts));
+  saveDB(db);
+  toast('Actualizacion forzada enviada — los dispositivos se recargaran en segundos');
+  renderGhAjustes();
+}
 
 // ===================== USUARIOS =====================
 let editingUserId=null;
