@@ -13,7 +13,7 @@
       "nombre": "Ajo polvo",
       "precioKg": 17000,
       "id": 1782314399451,
-      "stock": 0,
+      "stock": 100,
       "stockMin": 500
     },
     {
@@ -536,8 +536,18 @@
       "emoji": "🌿"
     }
   ],
-  "movimientos": [],
-  "_lastModified": "2026-06-24T15:19:59.453Z",
+  "movimientos": [
+    {
+      "id": 1782314885902,
+      "espId": 1782314399451,
+      "tipo": "entrada",
+      "cantidad": 100,
+      "nota": "",
+      "fecha": "2026-06-24T15:30:04.438Z",
+      "usuario": "Admin"
+    }
+  ],
+  "_lastModified": "2026-06-24T15:30:04.438Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
