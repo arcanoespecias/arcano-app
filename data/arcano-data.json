@@ -41,7 +41,7 @@
       "nombre": "Cebolla en escamas",
       "precioKg": 0,
       "id": 1782264912990,
-      "stock": 0,
+      "stock": 800000,
       "stockMin": 500
     },
     {
@@ -563,7 +563,16 @@
       "nota": "",
       "fecha": "2026-06-24T03:31:18.941Z",
       "usuario": "Admin"
+    },
+    {
+      "id": 1782271654096,
+      "espId": 1782264912990,
+      "tipo": "entrada",
+      "cantidad": 800000,
+      "nota": "",
+      "fecha": "2026-06-24T03:33:35.042Z",
+      "usuario": "Admin"
     }
   ],
-  "_lastModified": "2026-06-24T03:31:18.941Z"
+  "_lastModified": "2026-06-24T03:33:35.042Z"
 }
