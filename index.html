@@ -218,15 +218,16 @@
   var GH_DEFAULT = { owner: 'arcanoespecias', repo: 'arcano-app', branch: 'main' };
 
   // ===================== SERVICE WORKER =====================
-  // Registrar SW para control de cache: SIEMPRE busca lo ultimo del servidor
+  // Registro estable (sin timestamp) para que el browser detecte cambios de contenido
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=' + Date.now()).then(function(reg) {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
       console.log('[Arcano] SW registrado');
-      // Cuando haya una nueva version del SW, recargar
+      // Cuando se detecte nueva version del SW, recargar UNA sola vez
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         newWorker.addEventListener('statechange', function() {
-          if (newWorker.state === 'activated') {
+          if (newWorker.state === 'activated' && !sessionStorage.getItem('_sw_reloaded')) {
+            sessionStorage.setItem('_sw_reloaded', '1');
             console.log('[Arcano] Nueva version del SW activada, recargando...');
             window.location.reload();
           }
@@ -234,11 +235,6 @@
       });
     }).catch(function(err) {
       console.warn('[Arcano] SW registro fallo:', err);
-    });
-    // Cuando el SW toma control, actualizar UI
-    navigator.serviceWorker.addEventListener('controllerchange', function() {
-      console.log('[Arcano] Controller cambio, recargando...');
-      window.location.reload();
     });
   }
 
