@@ -69,7 +69,7 @@
       "nombre": "Oregano",
       "precioKg": 20000,
       "id": 1782314399459,
-      "stock": 0,
+      "stock": 8000000,
       "stockMin": 500
     },
     {
@@ -590,9 +590,18 @@
       "nota": "",
       "fecha": "2026-06-24T16:53:31.002Z",
       "usuario": "Operador"
+    },
+    {
+      "id": 1782333901719,
+      "espId": 1782314399459,
+      "tipo": "entrada",
+      "cantidad": 8000000,
+      "nota": "",
+      "fecha": "2026-06-24T20:45:19.232Z",
+      "usuario": "Operador"
     }
   ],
-  "_lastModified": "2026-06-24T16:53:31.002Z",
+  "_lastModified": "2026-06-24T20:45:19.232Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
