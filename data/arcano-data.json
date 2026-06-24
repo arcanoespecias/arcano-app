@@ -522,11 +522,11 @@
   "ventas": [],
   "usuarios": [
     {
-      "id": 1,
       "nombre": "Admin",
-      "pin": "1234",
+      "pin": "0621",
       "rol": "admin",
-      "emoji": "👑"
+      "emoji": "👑",
+      "id": 1
     },
     {
       "id": 2,
@@ -574,7 +574,7 @@
       "usuario": "Operador"
     }
   ],
-  "_lastModified": "2026-06-24T15:36:47.455Z",
+  "_lastModified": "2026-06-24T15:59:46.517Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
