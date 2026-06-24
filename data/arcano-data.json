@@ -525,7 +525,7 @@
       "nombre": "Admin",
       "pin": "0621",
       "rol": "admin",
-      "emoji": "Ã°ÂÂÂ",
+      "emoji": "👑",
       "id": 1
     },
     {
@@ -619,7 +619,7 @@
       "usuario": "Operador"
     }
   ],
-  "_lastModified": "2026-06-24T14:37:10.405Z",
+  "_lastModified": "2026-06-24T14:37:44.238Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
