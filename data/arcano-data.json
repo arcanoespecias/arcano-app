@@ -62,7 +62,7 @@
       "nombre": "Paprika ahumada",
       "precioKg": 0,
       "id": 1782264912993,
-      "stock": 0,
+      "stock": 20,
       "stockMin": 500
     },
     {
@@ -581,9 +581,18 @@
       "nota": "",
       "fecha": "2026-06-24T13:52:01.781Z",
       "usuario": "Admin"
+    },
+    {
+      "id": 1782309294609,
+      "espId": 1782264912993,
+      "tipo": "entrada",
+      "cantidad": 20,
+      "nota": "",
+      "fecha": "2026-06-24T13:55:21.207Z",
+      "usuario": "Operador"
     }
   ],
-  "_lastModified": "2026-06-24T13:52:01.781Z",
+  "_lastModified": "2026-06-24T13:55:21.207Z",
   "_ghConfig": {
     "owner": "arcanoespecias",
     "repo": "arcano-app",
