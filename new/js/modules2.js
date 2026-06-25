@@ -218,8 +218,8 @@ function renderGhAjustes(){
   else{badge.className='badge br';badge.textContent='Desconectado';form.style.display='block';info.style.display='none';}
 }
 function copiarLinkConexion(){var l=generarLinkConexion();if(!l){toast('No hay config','err');return;}navigator.clipboard.writeText(l).then(function(){toast('Link copiado');}).catch(function(){var i=document.getElementById('gh-share-link');if(i){i.select();document.execCommand('copy');toast('Link copiado');}});}
-function guardarGhConfigUI(){var t=document.getElementById('gh-token').value.trim();if(!t){toast('Pega tu token','err');return;}saveGhConfig({owner:GH_DEFAULT.owner,repo:GH_DEFAULT.repo,branch:GH_DEFAULT.branch,token:t});startGhPolling();ghPush().then(function(){toast('Conectado');renderGhAjustes();});}
-async function forzarSyncManual(){toast('Sincronizando...');var p=await ghPull();if(p){toast('Datos actualizados');refreshCurrentPage();}else{await ghPush();toast('Datos subidos');}}
+async function guardarGhConfigUI(){var t=document.getElementById('gh-token').value.trim();if(!t){toast('Pega tu token','err');return;}saveGhConfig({owner:GH_DEFAULT.owner,repo:GH_DEFAULT.repo,branch:GH_DEFAULT.branch,token:t});toast('Conectando...');var p=await ghPull();if(p){toast('Conectado — datos descargados de GitHub');}else{await ghPush();toast('Conectado — datos locales subidos a GitHub');}startGhPolling();renderGhAjustes();}
+async function forzarSyncManual(){toast('Descargando datos de GitHub...');var p=await ghPull();if(p){toast('Datos actualizados desde GitHub');refreshCurrentPage();}else{toast('Sin cambios — los datos ya estan al dia');}}
 function desconectarGh(){if(!confirm('¿Desconectar sync?'))return;clearGhConfig();renderGhAjustes();toast('Desconectado');}
 function forceReloadAllDevices(){
   if(!confirm('Esto actualizara la app en TODOS los dispositivos conectados. Continuar?'))return;
