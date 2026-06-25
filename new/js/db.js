@@ -29,9 +29,12 @@ function getDB() {
 }
 
 let _saveDBTimer = null;
+let _pendingPushSnapshot = null; // snapshot para push — evita que pull borre cambios locales
 function saveDB(db) {
   db._lastModified = new Date().toISOString();
   localStorage.setItem(DB_KEY, JSON.stringify(db));
+  // Guardar snapshot para el push — el pull no puede borrar esto
+  _pendingPushSnapshot = JSON.stringify(db);
   if (typeof ghPush === 'function' && getGhConfig()) {
     clearTimeout(_saveDBTimer);
     _saveDBTimer = setTimeout(function() { ghPush(); }, 800);
