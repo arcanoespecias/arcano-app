@@ -197,13 +197,41 @@ async function ghPull() {
   }
 }
 
+// -------------------- Obtener SHA actual sin descargar todo --------------------
+
+async function ghFetchSha() {
+  try {
+    const cfg = getGhConfig();
+    if (!cfg) return null;
+    const url = 'https://api.github.com/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + GH_DATA_PATH + (cfg.branch ? '?ref=' + cfg.branch : '');
+    const res = await fetch(url, {
+      headers: {
+        'Authorization': 'Bearer ' + cfg.token,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Arcano-PWA'
+      },
+      cache: 'no-store'
+    });
+    if (res.status === 404) return null;
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.sha;
+  } catch (e) {
+    console.warn('[GitHub Sync] Error obteniendo SHA:', e.message);
+    return null;
+  }
+}
+
 // -------------------- Push (escribir a GitHub) --------------------
 
 async function ghPush() {
   if (ghSyncInProgress) return;
   ghSyncInProgress = true;
   try {
-    const dbRaw = localStorage.getItem(DB_KEY);
+    // Usar snapshot si existe (protege cambios locales contra pull concurrente)
+    const dbRaw = (typeof _pendingPushSnapshot === 'string' && _pendingPushSnapshot) 
+                  ? _pendingPushSnapshot 
+                  : localStorage.getItem(DB_KEY);
     if (!dbRaw) return;
     const db = JSON.parse(dbRaw);
 
@@ -215,6 +243,13 @@ async function ghPush() {
 
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
 
+    // Siempre obtener el SHA mas reciente antes de subir (evita 409)
+    const freshSha = await ghFetchSha();
+    if (freshSha && freshSha !== ghRemoteSha) {
+      console.log('[GitHub Sync] SHA remoto cambió (' + (ghRemoteSha ? ghRemoteSha.slice(0,7) : 'null') + ' → ' + freshSha.slice(0,7) + '). Alguien mas subio datos.');
+      ghRemoteSha = freshSha;
+    }
+
     const body = {
       message: 'sync: ' + new Date().toISOString(),
       content: content
@@ -224,24 +259,37 @@ async function ghPush() {
       body.sha = ghRemoteSha;
     }
 
-    const result = await ghApiRequest('PUT', '', body);
-    ghRemoteSha = result.content.sha;
-    ghPushErrors = 0; // resetear contador de errores
-    console.log('[GitHub Sync] ✅ Push exitoso, SHA:', ghRemoteSha.slice(0,7));
+    var maxRetries = 3;
+    for (var attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await ghApiRequest('PUT', '', body);
+        ghRemoteSha = result.content.sha;
+        ghPushErrors = 0;
+        _pendingPushSnapshot = null; // limpiar snapshot — ya se subió
+        console.log('[GitHub Sync] Push exitoso, SHA:', ghRemoteSha.slice(0,7));
+        return;
+      } catch (err) {
+        if (err.message && (err.message.includes('409') || err.message.includes('sha'))) {
+          console.warn('[GitHub Sync] 409 en push, reintentando (' + attempt + '/' + maxRetries + ')...');
+          var newSha = await ghFetchSha();
+          if (newSha) {
+            body.sha = newSha;
+            ghRemoteSha = newSha;
+          } else {
+            delete body.sha;
+            ghRemoteSha = null;
+          }
+        } else {
+          throw err;
+        }
+      }
+    }
+    console.error('[GitHub Sync] Push falló tras ' + maxRetries + ' reintentos');
   } catch (err) {
     console.warn('[GitHub Sync] Error en push:', err.message);
     ghPushErrors++;
-    // Mostrar error al usuario (maximo 1 vez cada 30 segundos)
-    if (ghPushErrors <= 2 && typeof toast === 'function') {
-      toast('Error al sincronizar con GitHub: ' + err.message, 'err');
-    }
-    if (err.message && (err.message.includes('409') || err.message.includes('sha'))) {
-      ghRemoteSha = null;
-      const pulled = await ghPull();
-      if (pulled) {
-        ghSyncInProgress = false;
-        return ghPush();
-      }
+    if (ghPushErrors <= 5 && typeof toast === 'function') {
+      toast('Error sync: ' + err.message, 'err');
     }
   } finally {
     ghSyncInProgress = false;
